@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnhy.lsy.mapper.UserMapper">
+    <select id="find" parameterType="com.hnhy.lsy.entity.User" resultType="com.hnhy.lsy.entity.User">
+        select id,account,password,nick_name,img_url,phone,pocketMoney
+        from user
+        where account = #{account} and password = #{password} and userState = 1
+    </select>
+    <select id="secondCfm" parameterType="com.hnhy.lsy.entity.User" resultType="com.hnhy.lsy.entity.User">
+        select id,account,password,nick_name,img_url,phone,pocketMoney
+        from user
+        where account = #{account} and password = #{password} and id = #{id} and userState = 1
+    </select>
+    <select id="getUserById" parameterType="int" resultType="com.hnhy.lsy.entity.User">
+        select id,account,password,nick_name,img_url,phone,pocketMoney
+        from user
+        where id = #{id} and userState = 1
+    </select>
+    <update id="changeImg">
+        update user
+        set img_url = #{img_url}
+        where id = #{id}
+    </update>
+    <select id="userAccEcho" resultType="int">
+        select count(*) from user
+        where account = #{account} and id != #{id}
+    </select>
+    <update id="changeAcc">
+        update user
+        set account = #{account}
+        where id = #{id};
+    </update>
+    <update id="changeUn">
+        update user
+        set nick_name = #{newName}
+        where id = #{id};
+    </update>
+    <update id="changePn">
+        update user
+        set phone = #{phone}
+        where id = #{id}
+    </update>
+    <select id="cfmOldPassword" resultType="int">
+        select COUNT(*) from user
+        where id = #{id} and password = #{passwordOld}
+    </select>
+    <update id="changePassword">
+        update user
+        set password = #{passwordNew}
+        where id = #{id}
+    </update>
+    <select id="bankCardsCount" resultType="int">
+        select count(*) from usercards  where userid = #{id}
+    </select>
+
+    <update id="changePocketMoney">
+        update user
+        set pocketMoney = #{newMoney}
+        where id = #{userId}
+    </update>
+
+    <!-- 检查手机号是否重复 -->
+    <select id="checkPhoneOccur" resultType="int">
+        select COUNT(*) from user
+        where phone = #{newPhone} and id != #{userId};
+    </select>
+</mapper>

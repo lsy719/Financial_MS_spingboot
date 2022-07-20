@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnhy.lsy.mapper.TransactionMapper">
+    <resultMap id="transactionMap" type="com.hnhy.lsy.entity.Transaction" autoMapping="true">
+        <id column="id" property="id"/>
+        <association property="transactionMain" javaType="com.hnhy.lsy.entity.TransactionMain" autoMapping="true">
+<!--            column要是自己起的别名！！！-->
+            <id column="tMId" property="tMId"/>
+        </association>
+        <association property="transactionVerb" javaType="com.hnhy.lsy.entity.TransactionVerb" autoMapping="true">
+            <id column="tVId" property="tVId"/>
+        </association>
+        <association property="transactionObj" javaType="com.hnhy.lsy.entity.TransactionObj" autoMapping="true">
+            <id column="tOId" property="tOId"/>
+        </association>
+    </resultMap>
+<!--    银行卡操作记录-->
+    <insert id="cardAddUnbindRecordAdd">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, moneyAmount)
+        values
+        (#{userId}, #{mainMark}, #{mainContentId}, #{vMark}, 4, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    余额操作记录-其它-->
+    <insert id="pMoneyModOther">
+        insert into transaction
+        (userId, mainMark, vMark, objMark, MoneyResult, tdate, moneyAmount)
+        values
+        (#{userId}, #{mainMark}, #{vMark}, #{objMark}, #{MoneyResult}, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    余额操作记录-银行卡-->
+    <insert id="pMoneyModCard">
+        insert into transaction
+        (userId, mainMark, vMark, objMark, objContentId, MoneyResult, tdate, moneyAmount)
+        values
+        (#{userId}, #{mainMark}, #{vMark}, #{objMark}, #{objContentId}, #{MoneyResult}, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金全部卖出其它-->
+    <insert id="fundSoldAllOther">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 2, 4, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金全部卖出到余额-->
+    <insert id="fundSoldAllPocket">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, MoneyResult, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 2, 2, #{tdate}, #{MoneyResult}, #{moneyAmount})
+    </insert>
+<!--    基金全部卖出到银行卡-->
+    <insert id="fundSoldAllCard">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, objContentId, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 2, 1, #{objContentId}, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金部分卖出到其它-->
+    <insert id="fundSoldPartOther">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 4, 4, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金部分卖出到余额-->
+    <insert id="fundSoldPartPocket">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, MoneyResult, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 4, 2, #{tdate}, #{MoneyResult}, #{moneyAmount})
+    </insert>
+<!--    基金部分卖出到银行卡-->
+    <insert id="fundSoldPartCard">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, objContentId, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 4, 1, #{objContentId}, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金买入其它-->
+    <insert id="fundBuyOther">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 3, 4, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金买入余额-->
+    <insert id="fundBuyPocket">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, MoneyResult, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 3, 2, #{tdate}, #{MoneyResult}, #{moneyAmount})
+    </insert>
+<!--    基金买入银行卡-->
+    <insert id="fundBuyCard">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, objContentId, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 3, 1, #{objContentId}, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金添加其它-->
+    <insert id="fundNewOther">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 1, 4, #{tdate}, #{moneyAmount})
+    </insert>
+<!--    基金添加余额-->
+    <insert id="fundNewPocket">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, tdate, MoneyResult, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 1, 2, #{tdate}, #{MoneyResult}, #{moneyAmount})
+    </insert>
+<!--    基金添加银行卡-->
+    <insert id="fundNewCard">
+        insert into transaction
+        (userId, mainMark, mainContentId, vMark, objMark, objContentId, tdate, moneyAmount)
+        values
+        (#{userId}, 3, #{mainContentId}, 1, 1, #{objContentId}, #{tdate}, #{moneyAmount})
+    </insert>
+
+<!--    基金明细-->
+    <select id="fundTradeDetail" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and mainContentId = #{mainId} and mainMark = 3 and existState = 1
+        order by t.tdate DESC
+    </select>
+<!--    查出银行卡的卡名和卡号-->
+    <select id="getCardInfo" resultType="com.hnhy.lsy.entity.UserCardsForRecord">
+        select cardName, cardKey from usercards where id = #{objId}
+    </select>
+    <select id="getCardInfo2" resultType="com.hnhy.lsy.entity.UserCardsForRecord">
+        select cardName, cardKey from usercardsunbind where agoId = #{objId}
+    </select>
+
+<!--    余额明细-->
+    <select id="pocketTradeDetail" resultMap="transactionMap">
+        select
+        t.id, t.userId,
+        tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and (mainMark = 2 or (mainMark = 3 and objMark = 2)) and existState = 1
+        order by t.tdate DESC
+    </select>
+<!--    查出基金的名称和代码-->
+    <select id="getFundInfo" resultType="com.hnhy.lsy.entity.FundForRecord">
+        select u.financeCode as fundCode, f.name as fundName
+        from userHold as u join finance as f on u.financeCode = f.financeCode
+        where u.id = #{userHoldId}
+    </select>
+
+<!--    银行卡明细-->
+    <select id="cardTradeDetail" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        (
+        (mainMark = 1 and mainContentId = #{cardId}) or
+        (mainMark = 2 and objMark = 1 and objContentId = #{cardId}) or
+        (mainMark = 3 and objMark = 1 and objContentId = #{cardId})
+        )
+        and existState = 1
+        order by t.tdate DESC
+    </select>
+
+<!--    交易记录大模块-->
+    <!-- 首先应该获取数量，前端好表示页数 -->
+    <select id="transactionAllAllCount" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId} and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+    </select>
+    <select id="transactionAllAll" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+            <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and existState = 1
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <select id="transactionFundCount" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId} and
+        mainMark = 3 and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+    </select>
+    <select id="transactionFund" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        mainMark = 3 and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <select id="transactionPocketCount" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId} and
+        (mainMark = 2 or objMark = 2) and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+    </select>
+    <select id="transactionPocketCountFund" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId} and
+        tdate between #{beginDate} and #{endDate} and
+        (
+            (mainMark = 2 and vMark in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+            or
+            (objMark = 2 and vMark not in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+        )
+        and existState = 1
+    </select>
+    <select id="transactionPocket" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        (mainMark = 2 or objMark = 2) and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+    <select id="transactionPocketFund" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        tdate between #{beginDate} and #{endDate} and
+        (
+            (mainMark = 2 and vMark in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+            or
+            (objMark = 2 and vMark not in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+        )
+        and existState = 1
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <select id="transactionCardCount" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId} and
+        (mainMark = 1 or objMark = 1) and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+    </select>
+    <select id="transactionCardCountFund" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId} and
+        tdate between #{beginDate} and #{endDate} and
+        (
+            (mainMark = 1 and vMark in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+            or
+            (objMark = 1 and vMark not in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+        )
+        and existState = 1
+    </select>
+    <select id="transactionCard" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        (mainMark = 1 or objMark = 1) and
+        tdate between #{beginDate} and #{endDate} and
+        vMark in
+        <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and existState = 1
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+    <select id="transactionCardFund" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId} and
+        tdate between #{beginDate} and #{endDate} and
+        (
+            (mainMark = 1 and vMark in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+            or
+            (objMark = 1 and vMark not in
+                <foreach collection="vMarkList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            )
+        )
+        and existState = 1
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <!-- 交易记录删除 1，可见   0，回收站   -1，“彻底删除” -->
+    <update id="recordDelte">
+        update transaction
+        set existState = 0
+        where id = #{recordId}
+    </update>
+    <!-- 回收站交易记录操作 -->
+    <select id="recordRecycleCount" resultType="int">
+        select COUNT(*) from `transaction`
+        where userId = #{userId}
+        and existState = 0
+    </select>
+    <select id="recordRecycle" resultMap="transactionMap">
+        select
+        t.id, t.userId, tM.id as tMId,tM.tMOname as tMName,t.mainContentId,
+        tV.id as tVId, tV.tVname as tVname,
+        tObj.id as tOId,tObj.tMOname as tOName,t.objContentId,
+        t.moneyResult,t.tdate,t.moneyAmount
+        from `transaction` as t
+        join transactionmainobj as tM on t.mainMark = tM.id
+        join transactionVerb as tV on t.vMark = tV.id
+        join transactionmainobj as tObj on t.objMark = tObj.id
+        where userId = #{userId}
+        and existState = 0
+        order by t.tdate DESC
+        limit #{anchor},#{pageSize}
+    </select>
+    <update id="recycleRecord">
+        update `transaction`
+        set existState = #{existState}
+        where id in
+        <foreach collection="recordId" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

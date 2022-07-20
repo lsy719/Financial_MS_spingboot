@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnhy.lsy.mapper.ManagerMapper">
+    <select id="firstLogin" parameterType="com.hnhy.lsy.entity.User" resultType="com.hnhy.lsy.entity.Manager">
+        select id,account,password,adminLv,adminState,createTime,lastUpdTime
+        from manager
+        where account = #{account} and password = #{password} and adminState = 1
+    </select>
+    <select id="afterLogin" resultType="com.hnhy.lsy.entity.Manager">
+        select id,account,password,adminLv,adminState,createTime,lastUpdTime
+        from manager
+        where account = #{account} and password = #{password} and id = #{id}
+    </select>
+
+    <!-- 修改管理员密码 -->
+    <select id="changeAdminPasswprdOldPw" resultType="int">
+        select COUNT(*) from manager
+        where id = #{id} and password = #{pwOld}
+    </select>
+    <update id="changeAdminPassword">
+        update manager set password = #{pwNew}
+        where id = #{id}
+    </update>
+    <!-- 普通管理员列表 -->
+    <select id="getManagerList" resultType="com.hnhy.lsy.entity.Manager">
+        select id,account,password,adminLv,adminState,createTime,lastUpdTime
+        from manager
+        where adminLv = 1
+    </select>
+    <!-- 更改管理员状态 -->
+    <update id="changeAdminState">
+        update manager set adminState = #{newState}
+        where id = #{id}
+    </update>
+    <!-- 账号查重 -->
+    <select id="accountExist" resultType="int">
+        select COUNT(*) from manager
+        where account = #{account}
+    </select>
+    <!-- 添加账号 -->
+    <insert id="addAdmin">
+        insert into manager
+        (account,password,createTime,lastUpdTime)
+        values
+        (#{account}, #{password}, #{createTime},#{createTime})
+    </insert>
+    <!-- 先获取数量，好分页 -->
+    <select id="getAlluserCount" resultType="int">
+        select COUNT(*) from user;
+    </select>
+    <select id="getAllUser" resultType="com.hnhy.lsy.entity.UserForAdmin">
+        select id, account, nick_name, img_url, userState
+        from user
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- 用户搜索 -->
+    <select id="searchUserByidCount" resultType="int">
+        select COUNT(*)
+        from user
+        where id like "%"#{searchContent}"%"
+    </select>
+    <select id="searchUserByid" resultType="com.hnhy.lsy.entity.UserForAdmin">
+        select id, account, nick_name, img_url, userState
+        from user
+        where id like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <select id="searchUserByAccCount" resultType="int">
+        select COUNT(*)
+        from user
+        where account like "%"#{searchContent}"%"
+    </select>
+    <select id="searchUserByAcc" resultType="com.hnhy.lsy.entity.UserForAdmin">
+        select id, account, nick_name, img_url, userState
+        from user
+        where account like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <select id="searchUserByNameCount" resultType="int">
+        select COUNT(*)
+        from user
+        where nick_name like "%"#{searchContent}"%"
+    </select>
+    <select id="searchUserByName" resultType="com.hnhy.lsy.entity.UserForAdmin">
+        select id, account, nick_name, img_url, userState
+        from user
+        where nick_name like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- 查询用户记录基金数 -->
+    <select id="countUserFund" resultType="int">
+        select COUNT(*)
+        from userhold where userId = #{userId}
+    </select>
+    <!-- 查询用户绑定银行卡数 -->
+    <select id="countUserCard" resultType="int">
+        select COUNT(*)
+        from usercards where userId = #{userId}
+    </select>
+
+    <!-- 冻结用户 -->
+    <update id="freezeUser">
+        update user set userState = 0
+        where id = #{userId}
+    </update>
+    <!-- 恢复用户 -->
+    <update id="refreezeUser">
+        update user set userState = 1
+        where id = #{userId}
+    </update>
+    <!-- 重置头像 -->
+    <update id="resetAvatar">
+        update user set img_url = #{updContent}
+        where id = #{userId}
+    </update>
+    <!-- 重置用户名 -->
+    <update id="resetName">
+        update user set nick_name = #{updContent}
+        where id = #{userId}
+    </update>
+
+    <!-- 获取收录银行总数 -->
+    <select id="bankNum" resultType="int">
+        select COUNT(*) from bank;
+    </select>
+    <select id="bankNumni" resultType="int">
+        select COUNT(*) from bank where bankImg = "/img/UNKNOWN.png";
+    </select>
+    <!-- 获取全部银行 -->
+    <select id="allBank" resultType="com.hnhy.lsy.entity.Bank">
+        select id as bankId, bankCode, bankName, bankImg from bank
+        limit #{anchor},#{pageSize}
+    </select>
+    <select id="allBankni" resultType="com.hnhy.lsy.entity.Bank">
+        select id as bankId, bankCode, bankName, bankImg from bank
+        where bankImg = "/img/UNKNOWN.png"
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <!-- 根据银行代码查询 -->
+    <select id="searchBankCodeNum" resultType="int">
+        select COUNT(*) from bank where bankCode like "%"#{searchContent}"%"
+    </select>
+    <select id="searchBankCodeNumNoImg" resultType="int">
+        select COUNT(*) from bank where bankCode like "%"#{searchContent}"%" and bankImg = "/img/UNKNOWN.png"
+    </select>
+    <select id="searchBankCode" resultType="com.hnhy.lsy.entity.Bank">
+        select id as bankId, bankCode, bankName, bankImg from bank
+        where bankCode like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+    <select id="searchBankCodeNoImg" resultType="com.hnhy.lsy.entity.Bank">
+        select id as bankId, bankCode, bankName, bankImg from bank
+        where bankCode like "%"#{searchContent}"%" and bankImg = "/img/UNKNOWN.png"
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <!-- 根据银行名称查询 -->
+    <select id="searchBankNameNum" resultType="int">
+        select COUNT(*) from bank where bankName like "%"#{searchContent}"%"
+    </select>
+    <select id="searchBankNameNumNoImg" resultType="int">
+        select COUNT(*) from bank where bankName like "%"#{searchContent}"%" and bankImg = "/img/UNKNOWN.png"
+    </select>
+    <select id="searchBankName" resultType="com.hnhy.lsy.entity.Bank">
+        select id as bankId, bankCode, bankName, bankImg from bank
+        where bankName like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+    <select id="searchBankNameNoImg" resultType="com.hnhy.lsy.entity.Bank">
+        select id as bankId, bankCode, bankName, bankImg from bank
+        where bankName like "%"#{searchContent}"%" and bankImg = "/img/UNKNOWN.png"
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- 修改银行图标 -->
+    <update id="updBankLogo">
+        update bank set bankImg = #{bankImg}
+        where id = #{bankId}
+    </update>
+<!--=================================================================================================================-->
+    <!-- finance表获取全部 -->
+    <select id="getAllFundCount" resultType="int">
+        select COUNT(*) from finance
+    </select>
+    <select id="getAllFund" resultType="com.hnhy.lsy.entity.Finance">
+        select id as financeId, name as financeName, financeCode from finance
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- fundaddapply表获取全部 -->
+    <select id="getUserApplyCount" resultType="int">
+        select COUNT(*) from fundaddapply where applyState = 0
+    </select>
+    <select id="getUserApply" resultType="com.hnhy.lsy.entity.FundAddApply">
+        select id as applyId, userId, fundName, fundCode, applyTime from fundaddapply
+        where applyState = 0
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <!-- finance表按代码 -->
+    <select id="getAllFundCodeCount" resultType="int">
+        select COUNT(*) from finance
+        where financeCode like "%"#{searchContent}"%"
+    </select>
+    <select id="getAllFundCode" resultType="com.hnhy.lsy.entity.Finance">
+        select id as financeId, name as financeName, financeCode from finance
+        where financeCode like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- fundaddapply表按代码 -->
+    <select id="getUserApplyCodeCount" resultType="int">
+        select COUNT(*) from fundaddapply
+        where fundCode like "%"#{searchContent}"%"  and applyState = 0
+    </select>
+    <select id="getUserApplyCode" resultType="com.hnhy.lsy.entity.FundAddApply">
+        select id as applyId, userId, fundName, fundCode, applyTime from fundaddapply
+        where fundCode like "%"#{searchContent}"%"  and applyState = 0
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <!-- finance表按名称 -->
+    <select id="getAllFundNameCount" resultType="int">
+        select COUNT(*) from finance
+        where name like "%"#{searchContent}"%"
+    </select>
+    <select id="getAllFundName" resultType="com.hnhy.lsy.entity.Finance">
+        select id as financeId, name as financeName, financeCode from finance
+        where name like "%"#{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- fundaddapply表按名称 -->
+    <select id="getUserApplyNameCount" resultType="int">
+        select COUNT(*) from fundaddapply
+        where fundName like "%"#{searchContent}"%"  and applyState = 0
+    </select>
+    <select id="getUserApplyName" resultType="com.hnhy.lsy.entity.FundAddApply">
+        select id as applyId, userId, fundName, fundCode, applyTime from fundaddapply
+        where fundName like "%"#{searchContent}"%"  and applyState = 0
+        limit #{anchor},#{pageSize}
+    </select>
+
+    <!-- finance表按首数字 -->
+    <select id="getAllFund1NumCount" resultType="int">
+        select COUNT(*) from finance
+        where financeCode like #{searchContent}"%"
+    </select>
+    <select id="getAllFund1Num" resultType="com.hnhy.lsy.entity.Finance">
+        select id as financeId, name as financeName, financeCode from finance
+        where financeCode like #{searchContent}"%"
+        limit #{anchor},#{pageSize}
+    </select>
+    <!-- fundaddapply表按首数字 -->
+    <select id="getUserApply1NumCount" resultType="int">
+        select COUNT(*) from fundaddapply
+        where fundCode like #{searchContent}"%"  and applyState = 0
+    </select>
+    <select id="getUserApply1Num" resultType="com.hnhy.lsy.entity.FundAddApply">
+        select id as applyId, userId, fundName, fundCode, applyTime from fundaddapply
+        where fundCode like #{searchContent}"%"
+        limit #{anchor},#{pageSize}  and applyState = 0
+    </select>
+<!--=================================================================================================================-->
+    <update id="changeNameAllFund">
+        update finance set name = #{newName} where id = #{fundId}
+    </update>
+
+    <select id="fundExistCheck" resultType="int">
+        select COUNT(*) from finance where financeCode = #{fundCode};
+    </select>
+    <insert id="addFundUserApply">
+        insert into finance (`name`,financeCode)
+        values (#{fundName}, #{fundCode})
+    </insert>
+
+    <update id="userApplyFinish">
+        update fundaddapply set applyState = 1 where fundCode = #{fundCode}
+    </update>
+
+    <update id="refuseUserApply">
+        update fundaddapply set applyState = -1 where id = #{applyId}
+    </update>
+</mapper>

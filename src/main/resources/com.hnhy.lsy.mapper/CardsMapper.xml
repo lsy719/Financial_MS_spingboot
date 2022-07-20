@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnhy.lsy.mapper.CardsMapper">
+<!--    复合对象map处理-->
+    <resultMap id="cardsMap" type="com.hnhy.lsy.entity.UserCards" autoMapping="true">
+<!--        主键标识-->
+        <id column="id" property="id"/>
+<!--        关联对象-->
+        <association property="bank" javaType="com.hnhy.lsy.entity.Bank" autoMapping="true">
+            <id column="id" property="id"/>
+        </association>
+    </resultMap>
+    <select id="selectCardsById" parameterType="int" resultMap="cardsMap">
+        select
+        c.id as cardId, c.userId, c.cardKey, c.cardName, c.cardNote, c.cardMoney, c.bankCode,
+        b.id as bankId, b.bankName, b.bankImg
+        from usercards c join bank b on c.bankCode = b.bankCode
+        where c.userId = #{id}
+    </select>
+    <select id="selectCardNote" resultType="com.hnhy.lsy.entity.CardNote">
+        select id as cardNoteId, cardNote from cardnotes
+    </select>
+    <update id="modifyCardNote">
+        update usercards
+        set cardNote = #{cardNote}
+        where id = #{cardId} and userId = #{userId}
+    </update>
+    <select id="selectOneCard" resultMap="cardsMap">
+        select
+        c.id as cardId, c.userId, c.cardKey, c.cardName, c.cardNote, c.cardMoney, c.bankCode,
+        b.id as bankId, b.bankName, b.bankImg
+        from usercards c join bank b on c.bankCode = b.bankCode
+        where c.id = #{cardId} and c.userId = #{userId}
+    </select>
+    <update id="changeMoney">
+        update usercards
+        set cardMoney = #{cardMoney}
+        where id = #{cardId} and userId = #{userId}
+    </update>
+
+    <select id="checkCardExist" resultType="int">
+        select COUNT(*) from usercards
+        where userId = #{userId} and cardKey = #{cardKey}
+    </select>
+    <select id="checkBankExist" resultType="int">
+        select COUNT(*) from bank
+        where bankCode = #{bankCode}
+    </select>
+    <insert id="bindCard">
+        insert into usercards
+        (userId, cardKey,cardName,cardMoney,bankCode)
+        values
+        (#{userId},#{cardKey},#{cardName},#{cardMoney},#{bankCode})
+    </insert>
+    <insert id="addBank">
+        insert into bank
+        (bankCode, bankName,bankImg)
+        values
+        (#{bankCode},#{bankName},#{bankImg})
+    </insert>
+<!--    检查账号是否已经被使用-->
+    <select id="checkAccountUsed" resultType="int">
+        select COUNT(*) from user
+        where account = #{account}
+    </select>
+<!--    添加用户-->
+    <insert id="addUser">
+        insert into user
+        (account, password, nick_name, img_url, phone, pocketMoney)
+        values
+        (#{account}, #{password}, #{nick_name}, #{img_url}, #{phone}, #{pocketMoney})
+    </insert>
+
+<!--    解绑银行卡-->
+    <insert id="unbindcardAdd">
+        insert into usercardsunbind
+        (userId,cardKey,cardName,disbindMoney,disbindDate,agoId)
+        values
+        (#{userId}, #{cardKey}, #{cardName}, #{disbindMoney}, #{disbindDate}, #{agoId})
+    </insert>
+    <delete id="unbindcardDel">
+        delete from usercards
+        where id = #{cardId}
+    </delete>
+<!--    获取刚添加的银行卡id-->
+    <select id="getCardIdJustAdd" resultType="int">
+        select id as cardId from usercards where userId = #{userId} and cardKey = #{cardKey}
+    </select>
+<!--    检查这张卡是不是以前就删除过（解绑添加又解绑）-->
+    <select id="checkUnbindCardExist" resultType="int">
+        select COUNT(*) from usercardsunbind
+        where userId = #{userId} and cardKey = #{cardKey}
+    </select>
+<!--    之前就解绑过了，现在是又添加又解绑-->
+    <update id="updCardUnbind">
+        update usercardsunbind
+        set disbindMoney = #{disbindMoney}, disbindDate = #{disbindDate}, agoId = #{cardId}
+        where userId = #{userId} and cardKey = #{cardKey}
+    </update>
+
+    <!-- 手机号重复验证 -->
+    <select id="checkHasPhone" resultType="int">
+        select COUNT(*) from user
+        where phone = #{phone}
+    </select>
+</mapper>

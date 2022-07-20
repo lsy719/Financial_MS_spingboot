@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnhy.lsy.mapper.FinanceMapper">
+    <resultMap id="financeMap" type="com.hnhy.lsy.entity.UserHold" autoMapping="true">
+        <id column="id" property="id"/>
+        <association property="finance" javaType="com.hnhy.lsy.entity.Finance" autoMapping="true">
+            <id column="id" property="id"/>
+        </association>
+    </resultMap>
+    <select id="selectUserHoldByUserId" parameterType="int" resultMap="financeMap">
+        select
+        u.id as userHoldId, u.userId, u.baseMoney, u.iniDate, u.financeCode,
+        f.id as financeId, f.name as financeName
+        from userhold u join finance f on u.financeCode = f.financeCode
+        where u.userId = #{userId} and u.baseMoney > 0
+    </select>
+    <select id="selectSingleFinanceState" resultType="com.hnhy.lsy.entity.FinanceState">
+        select
+        id as fsId,userId,financeCode,thenState,updDate
+        from userFinanceState
+        where userId = #{userId} and financeCode = #{financeCode}
+--         由大到小（由新到旧）排列，并最多输出10条
+        group by updDate DESC limit 10
+    </select>
+    <select id="countBankBalance" resultType="double">
+        SELECT SUM(cardMoney) from usercards where userId = #{userId}
+    </select>
+<!--    添加记录-->
+    <insert id="addFinanceState">
+        insert into userfinancestate
+        (userId, financeCode, thenState, updDate)
+        values
+        (#{userId}, #{financeCode}, #{thenState}, #{updDate})
+    </insert>
+<!--    修改今日记录-->
+    <update id="updTodayState">
+        update userfinancestate
+        set thenState = #{thenState}
+        where id = #{fsId}
+    </update>
+
+<!--    重载单挑基金信息第一步，查到那条改了的基金(唯一的)-->
+    <select id="reloadSingleFund1" parameterType="int" resultMap="financeMap">
+        select
+        u.id as userHoldId, u.userId, u.baseMoney, u.iniDate, u.financeCode,
+        f.id as financeId, f.name as financeName
+        from userhold u join finance f on u.financeCode = f.financeCode
+        where u.id = #{userHoldId}
+    </select>
+    <!--    重载单挑基金信息第二步，和selectSingleFinanceState一模一样-->
+
+<!--    全部卖出-baseMoney置0-->
+    <update id="soldAllBaseMoney">
+        update userhold
+        set baseMoney = 0
+        where userId = #{userId} and financeCode = #{financeCode}
+    </update>
+<!--    全部卖出-删除记录-->
+    <delete id="soldAllStateDel">
+        delete from userfinancestate
+        where userId = #{userId} and financeCode = #{financeCode}
+    </delete>
+
+<!--    卖出部分-修改baseMoney-->
+    <update id="soldPartBaseMoney">
+        update userhold
+        set baseMoney = #{newMoney}
+        where id = #{holdId}
+    </update>
+<!--    卖出部分-修改最新一次的thenState-->
+    <update id="soldPartThenState">
+        update userfinancestate
+        set thenState = #{newState}
+        where id = #{fsId}
+    </update>
+
+<!--    买入-修改baseMoney即可-->
+    <update id="buyBaseMoney">
+        update userhold
+        set baseMoney = #{newMoney}
+        where id = #{holdId}
+    </update>
+
+<!--    查询所有基金列表-->
+    <select id="selectAllFund" resultType="com.hnhy.lsy.entity.Finance">
+        select id as financeId, name as financeName, financeCode
+        from finance
+    </select>
+<!--    查找已持有基金-->
+    <select id="selectHoldFund" resultType="com.hnhy.lsy.entity.FinanceHold">
+        select
+        u.id as fundHoldId, u.userId, f.id as financeId, f.name as financeName ,f.financeCode
+        from userhold u join finance f on u.financeCode = f.financeCode
+        where u.userId = #{userId} and u.baseMoney > 0
+    </select>
+<!--    根据名称查找基金-->
+    <select id="selectFundByName" resultType="com.hnhy.lsy.entity.Finance">
+        select id as financeId, name as financeName, financeCode
+        from finance
+        where name like "%"#{searchName}"%"
+    </select>
+<!--    添加userHold-->
+    <insert id="addUserHold">
+        insert into userhold
+        (userId, financeCode, baseMoney, iniDate)
+        values
+        (#{userId}, #{financeCode}, #{baseMoney}, #{iniDate})
+    </insert>
+<!--    查询刚添加的基金在userHold表中的Id-->
+    <select id="getFundIdJustAdd" resultType="int">
+        select id as userHoldId from userhold where userId = #{userId} and financeCode = #{fundCode}
+    </select>
+<!--    添加基金记录添加申请-->
+    <insert id="addFundAddApply">
+        insert into fundaddapply
+        (userId, fundName, fundCode, applyState, applyTime)
+        values
+        (#{userId}, #{fundName}, #{fundCode}, 0, #{applyTime})
+    </insert>
+<!--    查看已添加申请-->
+    <select id="checkFundAddApply" resultType="com.hnhy.lsy.entity.FundAddApply">
+        select id as applyId, fundName, fundCode, applyState, applyTime
+        from fundaddapply where userId = #{userId}
+    </select>
+<!--    删除已添加申请-->
+    <delete id="delFundAddApply">
+        delete from fundaddapply
+        where id = #{applyId}
+    </delete>
+<!--    我是不是之前买过这支基金？它在数据库里只是baseMoney变成0了-->
+    <select id="checkBoughtbefore" resultType="int">
+        select COUNT(*) from userHold
+        where userId = #{userId} and financeCode = #{fundCode}
+    </select>
+<!--    所以这次又买，更新下baseMoney就行-->
+    <update id="updBaseMoneyAAA">
+        update userHold
+        set baseMoney = #{baseMoney},iniDate = #{iniDate}
+        where userId = #{userId} and financeCode = #{financeCode}
+    </update>
+</mapper>
